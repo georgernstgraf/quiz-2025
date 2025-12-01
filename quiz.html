@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Quiz Questions</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            font-size: 40px;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        h2 {
+            color: #0a7cff;
+        }
+
+        .question-block {
+            width: 80%;
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 5px solid #ccc;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .question-header {
+            font-weight: bold;
+            width: 80%;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+        label {
+            cursor: pointer;
+            width: 50%;
+        }
+    </style>
+    <script type="text/javascript" src="quiz.ts" defer></script>
+</head>
+
+<body>
+    <h1>Your Quiz Questions</h1>
+    <div id="question-template" class="question-block">
+        <div class="question-header">
+            <span id="allQuestionsCount">##</span>
+            <span class="trueQuestionsCount">##</span>
+        </div>
+        <h2>Question Text</h2>
+        <label>
+            <input type="radio" name="questionAnswers" id="radio0" value="0" />
+            <div id="answer0">Option1</div>
+        </label><br/>
+        <label>
+            <input type="radio" name="questionAnswers" id="radio1" value="1" />
+            <div id="answer1">Option2</div>
+        </label><br/>
+        <label>
+            <input type="radio" name="questionAnswers" id="radio2" value="2" />
+            <div id="answer2">Option3</div>
+        </label><br/>
+        <label>
+            <input type="radio" name="questionAnswers" id="radio3" value="3" />
+            <div id="answer3">Option4</div>
+        </label><br/>
+    </div>
+
+</body>

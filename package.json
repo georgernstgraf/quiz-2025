@@ -1,0 +1,6 @@
+{
+  "name": "",
+  "devDependencies": {
+    "@types/node": "^24.10.0"
+  }
+}
