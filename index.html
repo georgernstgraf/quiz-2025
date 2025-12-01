@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Quiz Selector</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 500px;
+            margin: 40px auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        select,
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+        }
+
+        button {
+            margin-top: 25px;
+            padding: 10px 15px;
+            width: 100%;
+            background: #0a7cff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        #result {
+            margin-top: 30px;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>Select Quiz Parameters</h2>
+
+    <label for="category">Category</label>
+    <select id="category">
+        <option>Any Category</option>
+        <option>General Knowledge</option>
+        <option>Entertainment: Books</option>
+        <option>Entertainment: Film</option>
+        <option>Entertainment: Music</option>
+        <option>Entertainment: Musicals &amp; Theatres</option>
+        <option>Entertainment: Television</option>
+        <option>Entertainment: Video Games</option>
+        <option>Entertainment: Board Games</option>
+        <option>Science &amp; Nature</option>
+        <option>Science: Computers</option>
+        <option>Science: Mathematics</option>
+        <option>Mythology</option>
+        <option>Sports</option>
+        <option>Geography</option>
+        <option>History</option>
+        <option>Politics</option>
+        <option>Art</option>
+        <option>Celebrities</option>
+        <option>Animals</option>
+        <option>Vehicles</option>
+        <option>Entertainment: Comics</option>
+        <option>Science: Gadgets</option>
+        <option>Entertainment: Japanese Anime &amp; Manga</option>
+        <option>Entertainment: Cartoon &amp; Animations</option>
+    </select>
+
+    <label for="difficulty">Difficulty</label>
+    <select id="difficulty">
+        <option>Any Difficulty</option>
+        <option>easy</option>
+        <option>medium</option>
+        <option>hard</option>
+    </select>
+
+    <label for="amount">Amount of Questions</label>
+    <input id="amount" type="number" min="1" max="20" value="5" />
+
+    <button id="fetchButton">Get Questions</button>
+
+    <div id="result"></div>
+
+    <script>
+        document.getElementById("fetchButton").addEventListener("click", async () => {
+            const category = document.getElementById("category").value;
+            const difficulty = document.getElementById("difficulty").value;
+            const amount = document.getElementById("amount").value;
+
+            const url = `/questions?difficulty=${difficulty}&category=${category}&amount=${amount}`;
+
+            const res = await fetch(url);
+            const data = await res.json();
+
+            // Store data in sessionStorage as string
+            sessionStorage.setItem("quizData", JSON.stringify(data));
+
+            // Open the quiz page (new tab or same tab)
+            window.open("/quiz", "_blank");
+        });
+    </script>
+
+</body>
+
+</html>
