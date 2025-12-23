@@ -1,7 +1,8 @@
+import { assert } from "node:console";
 import { Prisma, PrismaClient } from "../prisma/generated/client.ts";
 
 // Create a singleton instance of the Prisma client
-export const prisma = new PrismaClient();
+const prisma = new PrismaClient();
 
 // ======= Cached data for performance =======
 const cachedDifficulties = await prisma.difficulty.findMany();
@@ -77,9 +78,7 @@ export async function trimWhitespaceFromAllAnswers() {
                     data: { answer: trimmed },
                 });
             } catch (error) {
-                console.error(
-                    `Failed to update answer ${a.answer}: ${error} -- deleting answer, you will need to re-run seed`,
-                );
+                console.error(`Failed to update answer ${a.answer}: ${error} -- deleting answer, you will need to re-run seed`);
                 await prisma.answer.delete({
                     where: { id: a.id },
                 });
@@ -126,18 +125,15 @@ export async function createQuestion(
         let found_diff = false;
         if (existingQuestion.difficulty.level !== new_question.difficulty) {
             found_diff = true;
-            message +=
-                `\nreceived difficulty: ${new_question.difficulty}, existing: ${existingQuestion.difficulty.level}`;
+            message += `\nreceived difficulty: ${new_question.difficulty}, existing: ${existingQuestion.difficulty.level}`;
         }
         if (existingQuestion.category.name !== new_question.category) {
             found_diff = true;
-            message +=
-                `\nreceived category: ${new_question.category}, existing: ${existingQuestion.category.name}`;
+            message += `\nreceived category: ${new_question.category}, existing: ${existingQuestion.category.name}`;
         }
         if (existingQuestion.type.name !== new_question.type) {
             found_diff = true;
-            message +=
-                `\nreceived type: ${new_question.type}, existing: ${existingQuestion.type.name}`;
+            message += `\nreceived type: ${new_question.type}, existing: ${existingQuestion.type.name}`;
         }
         if (
             existingQuestion.correct_answer.answer !==
@@ -155,48 +151,37 @@ export async function createQuestion(
             message +=
                 `\nreceived incorrect_answers.length: ${new_question.incorrect_answers.length}, existing: ${existingQuestion.incorrect_answers.length}`;
         }
-        const existingIncorrectAnswers = existingQuestion.incorrect_answers.map((
-            a,
-        ) => a.answer).toSorted();
+        const existingIncorrectAnswers = existingQuestion.incorrect_answers.map((a) => a.answer).toSorted();
         const newIncorrectAnswers = [...new_question.incorrect_answers].toSorted();
         for (let i = 0; i < existingIncorrectAnswers.length; i++) {
             if (
                 existingIncorrectAnswers[i] !== newIncorrectAnswers[i]
             ) {
                 found_diff = true;
-                message += `\nincorrect_answer received: ${newIncorrectAnswers[i]
-                    }, existing: ${existingIncorrectAnswers[i]}`;
+                message += `\nincorrect_answer received: ${newIncorrectAnswers[i]}, existing: ${existingIncorrectAnswers[i]}`;
             }
         }
         if (!found_diff) {
             return null; // Return null to indicate duplicate/not stored
         } else {
-            console.log(
-                "================================================================================",
-            );
+            console.log("================================================================================");
             console.log("DUPED QUESTION WITH DIFFERENCES");
             console.log(message);
-            console.log(
-                `incoming question: ${JSON.stringify(new_question, null, 2)}`,
-            );
+            console.log(`incoming question: ${JSON.stringify(new_question, null, 2)}`);
             console.log(
                 `existing question: ${JSON.stringify(existingQuestion, null, 2)}`,
             );
-            console.log(
-                "================================================================================",
-            );
+            console.log("================================================================================");
         }
     }
 
     // Use cached data instead of database queries
-    const difficulty =
-        cachedDifficulties.filter((d) => d.level === new_question.difficulty)[0];
+    const difficulty = cachedDifficulties.filter((d) => d.level === new_question.difficulty)[0];
     if (!difficulty) {
         throw new Error(`Difficulty '${new_question.difficulty}' not found`);
     }
 
-    const category =
-        cachedCategories.filter((c) => c.name === new_question.category)[0];
+    const category = cachedCategories.filter((c) => c.name === new_question.category)[0];
     if (!category) {
         throw new Error(`Category '${new_question.category}' not found`);
     }
@@ -209,9 +194,7 @@ export async function createQuestion(
     // Find or create all answers (handles unique constraint)
     const allAnswers = await Promise.all([
         findOrCreateAnswer(new_question.correct_answer),
-        ...new_question.incorrect_answers.map((answerText) =>
-            findOrCreateAnswer(answerText)
-        ),
+        ...new_question.incorrect_answers.map((answerText) => findOrCreateAnswer(answerText)),
     ]);
 
     const correctAnswer = allAnswers[0];
@@ -221,10 +204,10 @@ export async function createQuestion(
     return await prisma.question.create({
         data: {
             question: new_question.question,
-            difficulty_id: difficulty.id,
-            category_id: category.id,
-            type_id: type.id,
-            correct_answer_id: correctAnswer.id,
+            difficulty: { connect: { id: difficulty.id } },
+            category: { connect: { id: category.id } },
+            type: { connect: { id: type.id } },
+            correct_answer: { connect: { id: correctAnswer.id } },
             incorrect_answers: {
                 connect: incorrectAnswers.map((answer) => ({ id: answer.id })),
             },
@@ -363,9 +346,7 @@ export function getCategoryByOpentdbId(opentdb_id: number) {
     return cachedCategories.find((c) => c.opentdb_id === opentdb_id) || null;
 }
 
-export async function getQuestionCountInCategory(
-    categoryName: string,
-): Promise<number> {
+export async function getQuestionCountInCategory(categoryName: string): Promise<number> {
     return await prisma.question.count({
         where: {
             category: {
@@ -375,26 +356,20 @@ export async function getQuestionCountInCategory(
     });
 }
 
-// ======= Utility Functions =======
-
-export async function disconnectDatabase() {
-    await prisma.$disconnect();
-}
-
 export async function questionsDifficultyCategoryAmount(
     difficulty: string,
     category: string,
     amount: number,
 ) {
-const whereFilter: Prisma.QuestionWhereInput = {};
+    const whereFilter: Prisma.QuestionWhereInput = {};
 
-if (difficulty !== "Any Difficulty") {
-    whereFilter.difficulty = { level: { equals: difficulty } };
-}
+    if (difficulty !== "Any Difficulty") {
+        whereFilter.difficulty = { level: { equals: difficulty } };
+    }
 
-if (category !== "Any Category") {
-    whereFilter.category = { name: { equals: category } };
-}
+    if (category !== "Any Category") {
+        whereFilter.category = { name: { equals: category } };
+    }
     const allresults = await prisma.question.findMany({
         where: whereFilter,
         select: {
@@ -406,3 +381,11 @@ if (category !== "Any Category") {
     allresults.sort(() => Math.random() - 0.5);
     return allresults.slice(0, amount);
 }
+
+// ======= Utility Functions =======
+
+export async function disconnectDatabase() {
+    await prisma.$disconnect();
+}
+
+export { prisma };

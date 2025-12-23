@@ -1,13 +1,20 @@
 {
   "imports": {
-    "hono": "jsr:@hono/hono@^4.10.7"
+    "@db/sqlite": "jsr:@db/sqlite@^0.13.0",
+    "@prisma/client": "npm:@prisma/client@^6.19.1",
+    "dotenv": "npm:dotenv@^17.2.3",
+    "he": "npm:he@^1.2.0",
+    "hono": "jsr:@hono/hono@^4.10.7",
+    "prisma": "npm:prisma@^6.19.1"
   },
   "tasks": {
-    "start": "deno run --allow-net main.ts"
-  },
-  "compilerOptions": {
-    "jsx": "precompile",
-    "jsxImportSource": "hono/jsx",
-    "lib": ["deno.ns", "deno.unstable","es5", "es6", "dom", "dom.iterable"]
+    "validate": "deno -A prisma validate",
+    "generate": "deno -A prisma generate",
+    "migrate:dev": "deno -A prisma migrate dev",
+    "migrate:reset": "deno -A prisma migrate reset",
+    "migrate:status": "deno -A prisma migrate status",
+    "seed": "deno -A --env-file seed.ts",
+    "studio": "deno -A --env-file prisma studio",
+    "server": "deno -A --env-file main.ts"
   }
 }
