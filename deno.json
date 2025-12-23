@@ -1,11 +1,18 @@
 {
   "imports": {
     "@db/sqlite": "jsr:@db/sqlite@^0.13.0",
+    "@prisma/client": "npm:@prisma/client@^6.19.1",
+    "dotenv": "npm:dotenv@^17.2.3",
     "hono": "jsr:@hono/hono@^4.10.7",
-    "@prisma/client": "npm:@prisma/client@^7.2.0",
-    "@prisma/client/runtime/client": "npm:@prisma/client@^7.2.0/runtime/client"
+    "prisma": "npm:prisma@^6.19.1"
   },
   "tasks": {
-    "start": "deno run --allow-net main.ts"
+    "start": "deno run --allow-net main.ts",
+    "validate": "deno -A prisma validate",
+    "generate": "deno -A prisma generate",
+    "migrate:dev": "deno -A prisma migrate dev",
+    "migrate:status": "deno -A prisma migrate status",
+    "seed": "deno -A --env-file seed.ts",
+    "studio": "deno -A --env-file prisma studio"
   }
 }
