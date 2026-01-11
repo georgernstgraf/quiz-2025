@@ -6,21 +6,22 @@ generator client {
 
 datasource db {
     provider = "sqlite"
-    url = env("DATABASE_URL")
+    url      = env("DATABASE_URL")
 }
 
 model Question {
-    id                String     @id @default(cuid())
-    difficulty        Difficulty @relation(fields: [difficulty_id], references: [id])
+    id                String         @id @default(cuid())
+    difficulty        Difficulty     @relation(fields: [difficulty_id], references: [id])
     difficulty_id     String
-    category          Category   @relation(fields: [category_id], references: [id])
+    category          Category       @relation(fields: [category_id], references: [id])
     category_id       String
     question          String
-    incorrect_answers Answer[]   @relation(name: "IncorrectAnswers")
-    correct_answer    Answer     @relation(name: "CorrectAnswer", fields: [correct_answer_id], references: [id])
+    incorrect_answers Answer[]       @relation(name: "IncorrectAnswers")
+    correct_answer    Answer         @relation(name: "CorrectAnswer", fields: [correct_answer_id], references: [id])
     correct_answer_id String
-    type              Type       @relation(fields: [type_id], references: [id])
+    type              Type           @relation(fields: [type_id], references: [id])
     type_id           String
+    gameQuestions     GameQuestion[]
 }
 
 model Type {
@@ -30,10 +31,11 @@ model Type {
 }
 
 model Answer {
-    id                     String     @id @default(cuid())
+    id                     String         @id @default(cuid())
     answer                 String
-    incorrect_in_questions Question[] @relation(name: "IncorrectAnswers")
-    correct_in_questions   Question[] @relation(name: "CorrectAnswer")
+    incorrect_in_questions Question[]     @relation(name: "IncorrectAnswers")
+    correct_in_questions   Question[]     @relation(name: "CorrectAnswer")
+    playerAnswers          PlayerAnswer[]
 }
 
 model Category {
@@ -47,4 +49,73 @@ model Difficulty {
     id        String     @id @default(cuid())
     level     String     @unique
     questions Question[]
+}
+
+model Account {
+    id              String            @id @default(cuid())
+    displayName     String
+    createdAt       DateTime          @default(now())
+    createdSessions GameSession[]     @relation("SessionCreator")
+    participations  GameParticipant[]
+}
+
+model GameSession {
+    id                   String            @id @default(cuid())
+    roomCode             String            @unique
+    status               SessionStatus     @default(WAITING)
+    creator              Account           @relation("SessionCreator", fields: [creatorId], references: [id])
+    creatorId            String
+    currentQuestionIndex Int               @default(0)
+    createdAt            DateTime          @default(now())
+    startedAt            DateTime?
+    finishedAt           DateTime?
+    participants         GameParticipant[]
+    questions            GameQuestion[]
+}
+
+model GameParticipant {
+    id            String         @id @default(cuid())
+    account       Account        @relation(fields: [accountId], references: [id])
+    accountId     String
+    gameSession   GameSession    @relation(fields: [gameSessionId], references: [id], onDelete: Cascade)
+    gameSessionId String
+    totalScore    Int            @default(0)
+    joinedAt      DateTime       @default(now())
+    answers       PlayerAnswer[]
+
+    @@unique([accountId, gameSessionId])
+}
+
+model GameQuestion {
+    id            String         @id @default(cuid())
+    gameSession   GameSession    @relation(fields: [gameSessionId], references: [id], onDelete: Cascade)
+    gameSessionId String
+    question      Question       @relation(fields: [questionId], references: [id])
+    questionId    String
+    orderIndex    Int
+    answers       PlayerAnswer[]
+
+    @@unique([gameSessionId, orderIndex])
+}
+
+model PlayerAnswer {
+    id               String          @id @default(cuid())
+    participant      GameParticipant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+    participantId    String
+    gameQuestion     GameQuestion    @relation(fields: [gameQuestionId], references: [id], onDelete: Cascade)
+    gameQuestionId   String
+    selectedAnswer   Answer          @relation(fields: [selectedAnswerId], references: [id])
+    selectedAnswerId String
+    isCorrect        Boolean
+    timeToAnswer     Int
+    pointsEarned     Int
+    answeredAt       DateTime        @default(now())
+
+    @@unique([participantId, gameQuestionId])
+}
+
+enum SessionStatus {
+    WAITING
+    IN_PROGRESS
+    FINISHED
 }
