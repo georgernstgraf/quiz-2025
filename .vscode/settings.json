@@ -3,5 +3,6 @@
     "./"
   ],
   "editor.inlayHints.enabled": "off",
-  "deno.enable": true
+  "deno.enable": true,
+  "prisma.pinToPrisma6": true
 }
