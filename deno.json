@@ -8,11 +8,11 @@
     "prisma": "npm:prisma@^6.19.1"
   },
   "tasks": {
-    "validate": "deno -A prisma validate",
-    "generate": "deno -A prisma generate",
-    "migrate:dev": "deno -A prisma migrate dev",
-    "migrate:reset": "deno -A prisma migrate reset",
-    "migrate:status": "deno -A prisma migrate status",
+    "pv": "deno -A prisma validate",
+    "pg": "deno -A prisma generate",
+    "pmd": "deno -A prisma migrate dev",
+    "pmr": "deno -A prisma migrate reset",
+    "pms": "deno -A prisma migrate status",
     "seed": "deno -A --env-file seed.ts",
     "studio": "deno -A --env-file prisma studio",
     "server": "deno -A --env-file main.ts"
