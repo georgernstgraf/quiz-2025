@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="autor" content="Edvin & Fabian">
+    <title>login</title>
+</head>
+<body>
+    <form action="process_login.php" method="POST">
+        <h1>Login</h1>
+        <label for="user">Benutzername:</label>
+        <input type="text" id="user" name="user" required><br><br>
+        
+        <label for="password">Passwort:</label>
+        <input type="password" id="password" name="password" required><br><br>
+        
+        <input type="submit" value="Einloggen" onclick="einloggen()">
+    </form>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: white;
+            margin: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            margin: 0;
+            height: 80vh;
+        }
+        h1 {
+            color: #333;
+            display: flex;
+            justify-content: center;
+        }
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+        }
+        input[type="text"], input[type="password"] {
+            width: 80%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        input[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+    </style>
+    <script>
+        function einloggen() {
+            window.location.href = "quiz.html";
+        }
+    </script>
+</body>
+</html>
