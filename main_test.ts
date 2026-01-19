@@ -1,5 +1,6 @@
-import { assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
+import { assertEquals } from "@std/assert";
 
+// Test for external OpenTDB categories endpoint
 Deno.test("OpenTDB categories endpoint", async () => {
   const response = await fetch("https://opentdb.com/api_category.php");
   assertEquals(response.status, 200);
@@ -8,6 +9,7 @@ Deno.test("OpenTDB categories endpoint", async () => {
   assertEquals(data.trivia_categories.length > 0, true);
 });
 
+// Test for local questions endpoint (assumes server is running on localhost:5000)
 Deno.test("Local questions endpoint", async () => {
   try {
     const response = await fetch(
@@ -16,6 +18,7 @@ Deno.test("Local questions endpoint", async () => {
     assertEquals(response.status, 200);
     const data = await response.json();
     assertEquals(Array.isArray(data), true);
+    // Assuming the response is an array of questions
     if (data.length > 0) {
       assertEquals(typeof data[0].question, "string");
     }
@@ -24,5 +27,6 @@ Deno.test("Local questions endpoint", async () => {
       "Local server not running, skipping test:",
       (error as Error).message,
     );
+    // Skip the test if server is not available
   }
 });
