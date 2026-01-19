@@ -15,6 +15,9 @@
     "pms": "deno -A prisma migrate status",
     "seed": "deno -A --env-file seed.ts",
     "studio": "deno -A --env-file prisma studio",
-    "server": "deno -A --env-file main.ts"
+    "server": "deno -A --env-file main.ts",
+    "check": "deno check",
+    "lint": "deno lint",
+    "dev": "deno -A --env-file --watch main.ts"
   }
 }
