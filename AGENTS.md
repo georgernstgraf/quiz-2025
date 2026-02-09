@@ -49,6 +49,20 @@ deno task seed "Sports" "Geography"
 2. Run `deno task pmr` (migrate reset - generates client)
 3. Run `deno task seed` (populates database)
 
+### Database Configuration
+
+- `DATABASE_URL` in `.env` is relative to the `prisma/` folder
+- Example: `DATABASE_URL=file:./dev.db` points to `prisma/dev.db`
+
+### Prisma Schema Changes
+
+After modifying `prisma/schema.prisma`, run these commands in order:
+
+```bash
+deno task pg    # prisma generate - regenerate client types
+deno task pmd   # prisma migrate dev - create and apply migration
+```
+
 ## Code Style Guidelines
 
 ### Imports
@@ -264,3 +278,34 @@ Deno.test("Local questions endpoint", async () => {
 - **Prisma**: ORM with SQLite (npm:@prisma/client)
 - **he**: HTML entity decoder
 - **@std/assert**: Deno standard testing assertions
+
+## Git & GitHub Workflow
+
+### GitHub CLI
+
+Use the `gh` command for GitHub operations - it is authorized.
+
+```bash
+# View issue details
+gh issue view <number>
+
+# List issues
+gh issue list
+
+# Add comment to issue
+gh issue comment <number> --body "Your comment"
+
+# Create pull request
+gh pr create --title "Title" --body "Description"
+```
+
+### Issue Handling
+
+- When work on an issue is completed, add a comment to the issue documenting what was done
+- It is permitted and encouraged to update issue descriptions and comment on them during the planning phase to clarify requirements or document decisions
+
+### Commit Guidelines
+
+- Never commit or push unless explicitly asked to do so
+- Every commit message must include a reference to the GitHub issue it addresses (e.g., "issue #13")
+- If there is no existing issue for the task, ask the user to create one or provide the issue number

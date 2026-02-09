@@ -4,74 +4,233 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="autor" content="Edvin & Fabian">
-    <title>login</title>
-</head>
-<body>
-    <form action="process_login.php" method="POST">
-        <h1>Login</h1>
-        <label for="user">Benutzername:</label>
-        <input type="text" id="user" name="user" required><br><br>
-        
-        <label for="password">Passwort:</label>
-        <input type="password" id="password" name="password" required><br><br>
-        
-        <input type="submit" value="Einloggen" onclick="einloggen()">
-    </form>
+    <title>Quiz Login</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: white;
-            margin: 50px;
+            background-color: #f5f5f5;
+            margin: 0;
             display: flex;
             justify-content: center;
             align-items: center;
-            flex-direction: column;
-            margin: 0;
-            height: 80vh;
+            min-height: 100vh;
         }
         h1 {
             color: #333;
-            display: flex;
-            justify-content: center;
-        }
-        form {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            width: 50%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
             text-align: center;
+            margin-bottom: 30px;
+        }
+        .login-container {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        .form-group {
+            margin-bottom: 20px;
         }
         label {
             display: block;
             margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
         }
-        input[type="text"], input[type="password"] {
-            width: 80%;
-            padding: 8px;
-            margin-bottom: 15px;
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
             border: 1px solid #ccc;
             border-radius: 4px;
+            font-size: 16px;
+            box-sizing: border-box;
         }
-        input[type="submit"] {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 15px;
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+        button {
+            flex: 1;
+            padding: 14px 20px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.2s;
         }
-        input[type="submit"]:hover {
+        button[type="button"] {
+            background-color: #4CAF50;
+            color: white;
+        }
+        button[type="button"]:hover {
             background-color: #45a049;
         }
-    </style>
-    <script>
-        function einloggen() {
-            window.location.href = "quiz.html";
+        button[type="button"]:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
         }
+        button.join-btn {
+            background-color: #2196F3;
+        }
+        button.join-btn:hover:not(:disabled) {
+            background-color: #1976D2;
+        }
+        .error-message {
+            color: #f44336;
+            background-color: #ffebee;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        .hint {
+            color: #777;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h1>Quiz Login</h1>
+        <div id="error" class="error-message"></div>
+        
+        <div class="form-group">
+            <label for="displayName">Anzeigename:</label>
+            <input type="text" id="displayName" name="displayName" required 
+                   placeholder="Dein Name" maxlength="30">
+        </div>
+        
+        <div class="form-group">
+            <label for="roomCode">Raumcode (optional):</label>
+            <input type="text" id="roomCode" name="roomCode" 
+                   placeholder="6-stelliger Code" maxlength="6" pattern="[0-9]{6}">
+            <div class="hint">Lass leer, um ein neues Spiel zu erstellen</div>
+        </div>
+        
+        <div class="button-group">
+            <button type="button" id="createBtn" onclick="createGame()">Neues Spiel</button>
+            <button type="button" id="joinBtn" class="join-btn" onclick="joinGame()" disabled>Beitreten</button>
+        </div>
+    </div>
+
+    <script>
+        const displayNameInput = document.getElementById('displayName');
+        const roomCodeInput = document.getElementById('roomCode');
+        const createBtn = document.getElementById('createBtn');
+        const joinBtn = document.getElementById('joinBtn');
+        const errorDiv = document.getElementById('error');
+
+        function showError(message) {
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        function hideError() {
+            errorDiv.style.display = 'none';
+        }
+
+        function validateInputs() {
+            const hasName = displayNameInput.value.trim().length > 0;
+            const roomCode = roomCodeInput.value.trim();
+            const validRoomCode = /^\d{6}$/.test(roomCode);
+            
+            createBtn.disabled = !hasName;
+            joinBtn.disabled = !hasName || !validRoomCode;
+        }
+
+        displayNameInput.addEventListener('input', validateInputs);
+        roomCodeInput.addEventListener('input', validateInputs);
+
+        roomCodeInput.addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, '').slice(0, 6);
+        });
+
+        async function createGame() {
+            hideError();
+            const displayName = displayNameInput.value.trim();
+            
+            if (!displayName) {
+                showError('Bitte gib einen Anzeigenamen ein.');
+                return;
+            }
+
+            createBtn.disabled = true;
+            
+            try {
+                const response = await fetch('/api/create-game', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ displayName })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    showError(data.error || 'Fehler beim Erstellen des Spiels');
+                    createBtn.disabled = false;
+                    return;
+                }
+
+                sessionStorage.setItem('accountId', data.accountId);
+                window.location.href = `/lobby.html?room=${data.roomCode}`;
+            } catch (err) {
+                showError('Verbindungsfehler. Bitte versuche es erneut.');
+                createBtn.disabled = false;
+            }
+        }
+
+        async function joinGame() {
+            hideError();
+            const displayName = displayNameInput.value.trim();
+            const roomCode = roomCodeInput.value.trim();
+
+            if (!displayName || !/^\d{6}$/.test(roomCode)) {
+                showError('Bitte gib einen gültigen Raumcode ein.');
+                return;
+            }
+
+            joinBtn.disabled = true;
+
+            try {
+                const response = await fetch('/api/join-game', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ displayName, roomCode })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    showError(data.error || 'Fehler beim Beitreten des Spiels');
+                    joinBtn.disabled = false;
+                    return;
+                }
+
+                sessionStorage.setItem('accountId', data.accountId);
+                window.location.href = `/lobby.html?room=${data.roomCode}`;
+            } catch (err) {
+                showError('Verbindungsfehler. Bitte versuche es erneut.');
+                joinBtn.disabled = false;
+            }
+        }
+
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const roomCode = roomCodeInput.value.trim();
+                if (/^\d{6}$/.test(roomCode)) {
+                    joinGame();
+                } else {
+                    createGame();
+                }
+            }
+        });
     </script>
 </body>
 </html>

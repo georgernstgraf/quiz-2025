@@ -17,8 +17,9 @@
     "seed": "deno -A --env-file seed.ts",
     "studio": "deno -A --env-file prisma studio",
     "server": "deno -A --env-file main.ts",
-    "check": "deno check",
-    "lint": "deno lint",
+    "check": "deno check lib/ repo/ service/ .",
+    "lint": "deno lint lib/ repo/ service/ .",
+    "test": "deno test -A --env-file *_test*.ts",
     "dev": "deno -A --env-file --watch main.ts"
   }
 }
