@@ -1,73 +1,267 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="de">
 <head>
     <meta charset="UTF-8" />
-    <title>Quiz Questions</title>
+    <title>Aktuelle Frage</title>
     <style>
         body {
             font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
             display: flex;
-            font-size: 40px;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-        }
-
-        h2 {
-            color: #0a7cff;
+            padding: 40px 20px;
+            margin: 0;
         }
 
         .question-block {
-            width: 80%;
-            margin-bottom: 20px;
-            padding: 10px;
-            border: 5px solid #ccc;
+            background-color: white;
+            width: 100%;
+            max-width: 600px;
+            padding: 30px;
             border-radius: 10px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
         }
 
         .question-header {
             font-weight: bold;
-            width: 80%;
-            margin-bottom: 10px;
+            color: #777;
             display: flex;
             justify-content: space-between;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
         }
-        label {
-            cursor: pointer;
-            width: 50%;
-        }
-    </style>
-    <script type="text/javascript" src="quiz.ts" defer></script>
-</head>
 
+        h2 { color: #0a7cff; margin-top: 0; }
+
+        label {
+            display: block;
+            background-color: #f9f9f9;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            border: 1px solid #ddd;
+        }
+
+        label:hover { background-color: #eef5ff; border-color: #0a7cff; }
+        
+        .answer-text { display: inline-block; margin-left: 10px; font-size: 18px; }
+
+        .navigation-links {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 600px;
+            margin-top: 20px;
+        }
+
+        .nav-btn {
+            background-color: #333;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            font-size: 16px;
+        }
+        .nav-btn.next { background-color: #4CAF50; }
+    </style>
+</head>
 <body>
-    <h1>Your Quiz Questions</h1>
-    <div id="question-template" class="question-block">
+
+    <div class="question-block">
         <div class="question-header">
-            <span id="allQuestionsCount">##</span>
-            <span class="trueQuestionsCount">##</span>
+            <span id="allQuestionsCount">Lade Fragen...</span>
+            <span class="trueQuestionsCount">Score: 0</span>
         </div>
-        <h2>Question Text</h2>
+        
+        <h2 id="question-title">Bitte warten...</h2>
+        
         <label>
             <input type="radio" name="questionAnswers" id="radio0" value="0" />
-            <div id="answer0">Option1</div>
-        </label><br/>
+            <span class="answer-text" id="answer0">Option 1</span>
+        </label>
         <label>
             <input type="radio" name="questionAnswers" id="radio1" value="1" />
-            <div id="answer1">Option2</div>
-        </label><br/>
+            <span class="answer-text" id="answer1">Option 2</span>
+        </label>
         <label>
             <input type="radio" name="questionAnswers" id="radio2" value="2" />
-            <div id="answer2">Option3</div>
-        </label><br/>
+            <span class="answer-text" id="answer2">Option 3</span>
+        </label>
         <label>
             <input type="radio" name="questionAnswers" id="radio3" value="3" />
-            <div id="answer3">Option4</div>
-        </label><br/>
+            <span class="answer-text" id="answer3">Option 4</span>
+        </label>
     </div>
 
+    <div class="navigation-links">
+        <button class="nav-btn" id="prevBtn">&larr; Zurück</button>
+        <button class="nav-btn next" id="nextBtn">Vor &rarr;</button>
+    </div>
+
+    <script>
+        let questions = [];
+        let currentQuestionIndex = 0;
+        let userAnswers = []; 
+
+        const questionTitle = document.getElementById("question-title");
+        const allQuestionsCount = document.getElementById("allQuestionsCount");
+        const trueQuestionsCount = document.querySelector(".trueQuestionsCount");
+        const prevBtn = document.getElementById("prevBtn");
+        const nextBtn = document.getElementById("nextBtn");
+
+        const answerRadios = [
+            document.getElementById("radio0"),
+            document.getElementById("radio1"),
+            document.getElementById("radio2"),
+            document.getElementById("radio3"),
+        ];
+        const answerTexts = [
+            document.getElementById("answer0"),
+            document.getElementById("answer1"),
+            document.getElementById("answer2"),
+            document.getElementById("answer3"),
+        ];
+
+        // Hilfsfunktion für HTML-Sonderzeichen (z.B. &quot;)
+        function decodeHTML(html) {
+            const txt = document.createElement("textarea");
+            txt.innerHTML = html;
+            return txt.value;
+        }
+
+        // 1. Fragen laden
+        async function fetchQuestions() {
+            try {
+                // Werte aus der Startseite holen (Fallback auf Standardwerte)
+                const difficulty = sessionStorage.getItem('quizDifficulty') || 'medium';
+                const category = sessionStorage.getItem('quizCategory') || 'Sports';
+                
+                const response = await fetch(`/questions?difficulty=${difficulty}&category=${category}&amount=5`);
+                const data = await response.json();
+                
+                if (data && data.results && data.results.length > 0) {
+                    questions = data.results.map(q => {
+                        // Antworten sofort mischen
+                        const answers = [...q.incorrect_answers, q.correct_answer];
+                        answers.sort(() => Math.random() - 0.5);
+                        return { ...q, shuffledAnswers: answers };
+                    });
+                    
+                    userAnswers = new Array(questions.length).fill(null);
+                    renderQuestion();
+                } else {
+                    throw new Error("Keine Fragen gefunden");
+                }
+            } catch (error) {
+                console.error("Fehler beim Laden der Fragen", error);
+                questionTitle.textContent = "Fehler beim Laden der Fragen.";
+            }
+        }
+
+        // 2. Frage anzeigen
+        function renderQuestion() {
+            if (questions.length === 0) return;
+
+            const q = questions[currentQuestionIndex];
+            allQuestionsCount.textContent = `Frage ${currentQuestionIndex + 1} / ${questions.length}`;
+            
+            // Score live berechnen
+            let currentScore = 0;
+            userAnswers.forEach((ans, index) => {
+                if (ans === questions[index].correct_answer) currentScore++;
+            });
+            trueQuestionsCount.textContent = `Score: ${currentScore}`;
+
+            questionTitle.textContent = decodeHTML(q.question);
+
+            // Antworten einfüllen
+            q.shuffledAnswers.forEach((ans, i) => {
+                if (answerTexts[i] && answerRadios[i]) {
+                    answerTexts[i].textContent = decodeHTML(ans);
+                    answerRadios[i].value = ans; 
+                    answerRadios[i].parentElement.style.display = 'block';
+                    // Vorherige Wahl wiederherstellen
+                    answerRadios[i].checked = (userAnswers[currentQuestionIndex] === ans);
+                }
+            });
+
+            // Übrige Radios (z.B. bei Wahr/Falsch) ausblenden
+            for (let i = q.shuffledAnswers.length; i < 4; i++) {
+                if (answerRadios[i]) answerRadios[i].parentElement.style.display = 'none';
+            }
+
+            // Buttons anpassen
+            prevBtn.style.visibility = currentQuestionIndex === 0 ? 'hidden' : 'visible';
+            
+            if (currentQuestionIndex === questions.length - 1) {
+                nextBtn.innerHTML = "Beenden &check;";
+                nextBtn.style.backgroundColor = "#f44336"; 
+            } else {
+                nextBtn.innerHTML = "Vor &rarr;";
+                nextBtn.style.backgroundColor = "#4CAF50"; 
+            }
+        }
+
+        // 3. Antwort speichern
+        function saveCurrentAnswer() {
+            const selected = answerRadios.find(r => r.checked);
+            if (selected) {
+                userAnswers[currentQuestionIndex] = selected.value;
+            }
+        }
+
+        // 4. Zurück-Button
+        prevBtn.addEventListener("click", () => {
+            saveCurrentAnswer();
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                renderQuestion();
+            }
+        });
+
+        // 5. Vor-Button
+        nextBtn.addEventListener("click", () => {
+            saveCurrentAnswer();
+            
+            if (!userAnswers[currentQuestionIndex]) {
+                alert("Bitte wähle eine Antwort aus!");
+                return;
+            }
+
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                renderQuestion();
+            } else {
+                showFinished();
+            }
+        });
+
+        // 6. Spielende
+        function showFinished() {
+            let finalScore = 0;
+            userAnswers.forEach((ans, index) => {
+                if (ans === questions[index].correct_answer) finalScore++;
+            });
+
+            const block = document.querySelector(".question-block");
+            block.innerHTML = `
+                <h2 style="text-align:center; color: #4CAF50;">Quiz beendet!</h2>
+                <p style="text-align:center; font-size: 24px;">Du hast <strong>${finalScore} von ${questions.length}</strong> Punkten erreicht.</p>
+                <div style="text-align:center; margin-top:30px;">
+                    <a href="index.html" style="padding: 15px 30px; background: #2196F3; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">Zurück zur Startseite</a>
+                </div>
+            `;
+            document.querySelector(".navigation-links").style.display = 'none';
+        }
+
+        // Skript beim Laden starten
+        document.addEventListener("DOMContentLoaded", fetchQuestions);
+    </script>
 </body>
+</html>
