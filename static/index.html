@@ -3,84 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="autor" content="Edvin & Fabian">
-    <title>Quiz Login</title>
+    <title>Quiz Willkommen & Login</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             background-color: #f5f5f5;
             margin: 0;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
-            min-height: 100vh;
+            padding: 40px 20px;
         }
-        h1 {
-            color: #333;
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        .login-container {
+        h1 { color: #333; text-align: center; }
+        .container {
             background-color: #fff;
-            padding: 40px;
+            padding: 30px;
             border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
             width: 100%;
-            max-width: 400px;
-        }
-        .form-group {
+            max-width: 450px;
             margin-bottom: 20px;
         }
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-            color: #555;
-        }
-        input[type="text"] {
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
+        input[type="text"], select {
             width: 100%;
-            padding: 12px;
+            padding: 10px;
             border: 1px solid #ccc;
             border-radius: 4px;
-            font-size: 16px;
             box-sizing: border-box;
+            font-size: 16px;
         }
-        input[type="text"]:focus {
-            outline: none;
-            border-color: #4CAF50;
-        }
-        .button-group {
-            display: flex;
-            gap: 10px;
-            margin-top: 30px;
-        }
+        .button-group { display: flex; gap: 10px; margin-top: 20px; }
         button {
             flex: 1;
-            padding: 14px 20px;
+            padding: 12px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
             font-size: 16px;
             font-weight: bold;
-            transition: background-color 0.2s;
-        }
-        button[type="button"] {
-            background-color: #4CAF50;
             color: white;
         }
-        button[type="button"]:hover {
-            background-color: #45a049;
-        }
-        button[type="button"]:disabled {
-            background-color: #ccc;
-            cursor: not-allowed;
-        }
-        button.join-btn {
-            background-color: #2196F3;
-        }
-        button.join-btn:hover:not(:disabled) {
-            background-color: #1976D2;
-        }
+        #createBtn { background-color: #4CAF50; }
+        #joinBtn { background-color: #2196F3; }
+        button:disabled { background-color: #ccc; cursor: not-allowed; }
+        
         .error-message {
             color: #f44336;
             background-color: #ffebee;
@@ -89,40 +57,83 @@
             margin-bottom: 20px;
             display: none;
         }
-        .hint {
-            color: #777;
-            font-size: 14px;
-            margin-top: 5px;
+
+        .scores-section {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
         }
+        .scores-list { list-style: none; padding: 0; margin: 0; }
+        .scores-list li {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+        }
+        hr { border: 0; border-top: 1px solid #eee; margin: 20px 0; }
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <h1>Quiz Login</h1>
+
+    <h1>Willkommen beim ultimativen Quiz!</h1>
+
+    <div class="container">
         <div id="error" class="error-message"></div>
-        
+
         <div class="form-group">
-            <label for="displayName">Anzeigename:</label>
-            <input type="text" id="displayName" name="displayName" required 
-                   placeholder="Dein Name" maxlength="30">
+            <label for="displayName">Dein Anzeigename:</label>
+            <input type="text" id="displayName" placeholder="Name eingeben" required>
         </div>
-        
+
         <div class="form-group">
-            <label for="roomCode">Raumcode (optional):</label>
-            <input type="text" id="roomCode" name="roomCode" 
-                   placeholder="6-stelliger Code" maxlength="6" pattern="[0-9]{6}">
-            <div class="hint">Lass leer, um ein neues Spiel zu erstellen</div>
+            <label for="roomCode">Raumcode (um Partner beizutreten):</label>
+            <input type="text" id="roomCode" placeholder="6-stelliger Code" maxlength="6">
         </div>
-        
+
+        <hr>
+
+        <h3>Neues Spiel erstellen</h3>
+        <div class="form-group">
+            <label for="difficulty">Schwierigkeit:</label>
+            <select id="difficulty">
+                <option value="easy">Leicht</option>
+                <option value="medium">Mittel</option>
+                <option value="hard">Schwer</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="topic">Thema (Topic):</label>
+            <select id="topic">
+                <option value="Sports">Sport</option>
+                <option value="History">Geschichte</option>
+                <option value="Science">Wissenschaft</option>
+            </select>
+        </div>
+
         <div class="button-group">
-            <button type="button" id="createBtn" onclick="createGame()">Neues Spiel</button>
-            <button type="button" id="joinBtn" class="join-btn" onclick="joinGame()" disabled>Beitreten</button>
+            <button id="createBtn" onclick="createGame()">Neues Spiel</button>
+            <button id="joinBtn" onclick="joinGame()">Beitreten</button>
         </div>
+    </div>
+
+    <div class="scores-section">
+        <h2>Aktuelle Top Scores</h2>
+        <ul class="scores-list" id="scoreList">
+            <li><span>Max Mustermann</span> <span>150 Pkt.</span></li>
+            <li><span>Lisa Müller</span> <span>120 Pkt.</span></li>
+            <li><span>Spieler3</span> <span>90 Pkt.</span></li>
+        </ul>
     </div>
 
     <script>
         const displayNameInput = document.getElementById('displayName');
         const roomCodeInput = document.getElementById('roomCode');
+        const difficultySelect = document.getElementById('difficulty');
+        const topicSelect = document.getElementById('topic');
         const createBtn = document.getElementById('createBtn');
         const joinBtn = document.getElementById('joinBtn');
         const errorDiv = document.getElementById('error');
@@ -136,22 +147,6 @@
             errorDiv.style.display = 'none';
         }
 
-        function validateInputs() {
-            const hasName = displayNameInput.value.trim().length > 0;
-            const roomCode = roomCodeInput.value.trim();
-            const validRoomCode = /^\d{6}$/.test(roomCode);
-            
-            createBtn.disabled = !hasName;
-            joinBtn.disabled = !hasName || !validRoomCode;
-        }
-
-        displayNameInput.addEventListener('input', validateInputs);
-        roomCodeInput.addEventListener('input', validateInputs);
-
-        roomCodeInput.addEventListener('input', function() {
-            this.value = this.value.replace(/\D/g, '').slice(0, 6);
-        });
-
         async function createGame() {
             hideError();
             const displayName = displayNameInput.value.trim();
@@ -162,6 +157,10 @@
             }
 
             createBtn.disabled = true;
+            
+            // Einstellungen speichern, damit die Quiz-Seite später weiß, was gewählt wurde
+            sessionStorage.setItem('quizDifficulty', difficultySelect.value);
+            sessionStorage.setItem('quizCategory', topicSelect.value);
             
             try {
                 const response = await fetch('/api/create-game', {
@@ -192,7 +191,7 @@
             const roomCode = roomCodeInput.value.trim();
 
             if (!displayName || !/^\d{6}$/.test(roomCode)) {
-                showError('Bitte gib einen gültigen Raumcode ein.');
+                showError('Bitte gib Namen und einen 6-stelligen Raumcode ein.');
                 return;
             }
 
@@ -220,17 +219,6 @@
                 joinBtn.disabled = false;
             }
         }
-
-        document.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                const roomCode = roomCodeInput.value.trim();
-                if (/^\d{6}$/.test(roomCode)) {
-                    joinGame();
-                } else {
-                    createGame();
-                }
-            }
-        });
     </script>
 </body>
 </html>
